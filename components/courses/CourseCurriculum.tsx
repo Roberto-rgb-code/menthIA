@@ -1,6 +1,6 @@
-// components/instructor/create-course/CourseCurriculumStep.tsx
+// components/courses/CourseCurriculum.tsx
 import React from 'react';
-import { Curso, Seccion } from '@/types/Curso';
+import { Curso, Seccion, Leccion } from '@/types/Curso';
 
 interface CourseCurriculumStepProps {
   courseData: Partial<Curso>;
@@ -8,70 +8,66 @@ interface CourseCurriculumStepProps {
 }
 
 const CourseCurriculumStep: React.FC<CourseCurriculumStepProps> = ({ courseData, handleChange }) => {
-  const secciones = courseData.secciones || [];
+  const secciones: Seccion[] = courseData.secciones || [];
 
   const addSection = () => {
     const newSection: Seccion = {
       id: `section-${Date.now()}`,
       titulo: '',
-      orden: secciones.length + 1,
+      orden: (secciones?.length || 0) + 1,
       lecciones: [],
     };
     handleChange('secciones', [...secciones, newSection]);
   };
 
   const updateSectionTitle = (index: number, title: string) => {
-    const updatedSecciones = [...secciones];
-    updatedSecciones[index].titulo = title;
-    handleChange('secciones', updatedSecciones);
+    const updated = [...secciones];
+    updated[index].titulo = title;
+    handleChange('secciones', updated);
   };
 
   const addLesson = (sectionIndex: number) => {
-    const updatedSecciones = [...secciones];
-    const section = updatedSecciones[sectionIndex];
-    if (section) {
-      const newLesson = {
-        id: `lesson-${Date.now()}`,
-        titulo: '',
-        tipo: 'video',
-        contenidoUrl: '',
-        duracion: 0,
-        orden: section.lecciones.length + 1,
-      };
-      section.lecciones.push(newLesson);
-      handleChange('secciones', updatedSecciones);
-    }
+    const updated = [...secciones];
+    const section = updated[sectionIndex];
+    if (!section) return;
+
+    const newLesson: Leccion = {
+      id: `lesson-${Date.now()}`,
+      titulo: '',
+      // 👇 clave: castear el literal al tipo de la interfaz
+      tipo: 'video' as Leccion['tipo'],
+      contenidoUrl: '',
+      duracion: 0,
+      orden: (section.lecciones?.length || 0) + 1,
+    };
+
+    section.lecciones.push(newLesson);
+    handleChange('secciones', updated);
   };
 
   const updateLessonTitle = (sectionIndex: number, lessonIndex: number, title: string) => {
-    const updatedSecciones = [...secciones];
-    const section = updatedSecciones[sectionIndex];
-    if (section && section.lecciones[lessonIndex]) {
-      section.lecciones[lessonIndex].titulo = title;
-      handleChange('secciones', updatedSecciones);
-    }
+    const updated = [...secciones];
+    const section = updated[sectionIndex];
+    if (!section || !section.lecciones[lessonIndex]) return;
+
+    section.lecciones[lessonIndex].titulo = title;
+    handleChange('secciones', updated);
   };
 
   const removeSection = (index: number) => {
-    const updatedSecciones = secciones.filter((_, i) => i !== index);
-    const reorderedSecciones = updatedSecciones.map((sec, i) => ({
-      ...sec,
-      orden: i + 1,
-    }));
-    handleChange('secciones', reorderedSecciones);
+    const updated = secciones.filter((_, i) => i !== index)
+      .map((sec, i) => ({ ...sec, orden: i + 1 }));
+    handleChange('secciones', updated);
   };
 
   const removeLesson = (sectionIndex: number, lessonIndex: number) => {
-    const updatedSecciones = [...secciones];
-    const section = updatedSecciones[sectionIndex];
-    if (section) {
-      section.lecciones = section.lecciones.filter((_, i) => i !== lessonIndex);
-      section.lecciones = section.lecciones.map((leccion, i) => ({
-        ...leccion,
-        orden: i + 1,
-      }));
-      handleChange('secciones', updatedSecciones);
-    }
+    const updated = [...secciones];
+    const section = updated[sectionIndex];
+    if (!section) return;
+
+    section.lecciones = section.lecciones.filter((_, i) => i !== lessonIndex)
+      .map((lec, i) => ({ ...lec, orden: i + 1 }));
+    handleChange('secciones', updated);
   };
 
   return (
@@ -103,6 +99,7 @@ const CourseCurriculumStep: React.FC<CourseCurriculumStepProps> = ({ courseData,
               Eliminar Sección
             </button>
           </div>
+
           <input
             type="text"
             placeholder="Título de la sección (Ej: Introducción al Machine Learning)"
@@ -115,12 +112,10 @@ const CourseCurriculumStep: React.FC<CourseCurriculumStepProps> = ({ courseData,
           {section.lecciones.length === 0 && (
             <p className="text-gray-500 italic ml-4 mb-3">Esta sección no tiene lecciones aún.</p>
           )}
+
           <ul className="space-y-2 ml-4">
             {section.lecciones.map((lesson, lessonIndex) => (
-              <li
-                key={lesson.id}
-                className="flex items-center space-x-2 bg-white p-3 border border-gray-200 rounded-md"
-              >
+              <li key={lesson.id} className="flex items-center space-x-2 bg-white p-3 border border-gray-200 rounded-md">
                 <span className="text-gray-600 font-medium mr-2">
                   {sectionIndex + 1}.{lesson.orden}
                 </span>
@@ -140,6 +135,7 @@ const CourseCurriculumStep: React.FC<CourseCurriculumStepProps> = ({ courseData,
               </li>
             ))}
           </ul>
+
           <button
             onClick={() => addLesson(sectionIndex)}
             className="mt-4 flex items-center text-blue-500 hover:text-blue-700 text-sm font-semibold px-3 py-1 rounded-md border border-blue-400 hover:border-blue-600 transition-colors"
