@@ -23,7 +23,7 @@ const Navbar = () => {
   const { user, logout, loading } = useAuth();
   const router = useRouter();
 
-  // Cart
+  // Cart (solo se usará si hay user)
   const { items, itemCount, subtotalFormatted, removeItem } = useCart();
   const [cartOpen, setCartOpen] = useState(false);
   const cartRef = useRef<HTMLDivElement>(null);
@@ -124,7 +124,7 @@ const Navbar = () => {
                   Pagos
                 </Link>
 
-                {/* Notificaciones (campanita con el MISMO icono) */}
+                {/* Notificaciones */}
                 <NotificationBell
                   renderTrigger={({ count, onToggle }) => (
                     <button
@@ -142,7 +142,7 @@ const Navbar = () => {
                   )}
                 />
 
-                {/* Carrito (desktop) — SOLO ICONO */}
+                {/* Carrito (desktop) — PRIVADO */}
                 <div className="relative" ref={cartRef}>
                   <button
                     onClick={() => setCartOpen((s) => !s)}
@@ -157,7 +157,6 @@ const Navbar = () => {
                     )}
                   </button>
 
-                  {/* Mini dropdown del carrito */}
                   {cartOpen && (
                     <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl ring-1 ring-black ring-opacity-5 z-50">
                       <div className="p-3 border-b">
@@ -289,92 +288,7 @@ const Navbar = () => {
                 <Link href="/community" className={navLinkClasses("/community")}>
                   Comunidad
                 </Link>
-
-                {/* Carrito también disponible para invitados — SOLO ICONO */}
-                <div className="relative" ref={cartRef}>
-                  <button
-                    onClick={() => setCartOpen((s) => !s)}
-                    className="relative p-2 rounded-lg text-blue-100 hover:text-white hover:bg-blue-600"
-                    aria-label="Abrir carrito"
-                  >
-                    <FaShoppingCart className="h-5 w-5" />
-                    {itemCount > 0 && (
-                      <span className="absolute -top-1 -right-1 inline-flex items-center justify-center text-[10px] font-bold rounded-full bg-white text-blue-700 px-1.5 py-0.5">
-                        {itemCount}
-                      </span>
-                    )}
-                  </button>
-
-                  {cartOpen && (
-                    <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl ring-1 ring-black ring-opacity-5 z-50">
-                      <div className="p-3 border-b">
-                        <div className="text-sm font-semibold text-gray-800">Tu carrito</div>
-                        <div className="text-xs text-gray-500">
-                          {itemCount > 0 ? `${itemCount} artículo(s)` : "Vacío"}
-                        </div>
-                      </div>
-                      <div className="max-h-80 overflow-auto divide-y">
-                        {items.slice(0, 3).map((it) => (
-                          <div key={it.id} className="flex items-center gap-3 p-3">
-                            <div className="w-12 h-12 flex-shrink-0 bg-gray-100 rounded-md overflow-hidden grid place-items-center">
-                              {it.image ? (
-                                <Image
-                                  src={it.image}
-                                  alt={it.title}
-                                  width={48}
-                                  height={48}
-                                  className="object-cover w-full h-full"
-                                />
-                              ) : (
-                                <FaShoppingCart className="text-gray-400" />
-                              )}
-                            </div>
-                            <div className="flex-1">
-                              <div className="text-sm font-medium text-gray-800 line-clamp-1">{it.title}</div>
-                              <div className="text-xs text-gray-500">
-                                {it.kind} · x{it.quantity}
-                              </div>
-                            </div>
-                            <button
-                              onClick={() => removeItem(it.id)}
-                              className="text-red-600 hover:text-red-700 p-2"
-                              aria-label="Eliminar del carrito"
-                            >
-                              <FaTrashAlt />
-                            </button>
-                          </div>
-                        ))}
-                        {items.length === 0 && (
-                          <div className="p-4 text-center text-sm text-gray-500">No hay productos</div>
-                        )}
-                      </div>
-                      <div className="p-3 border-t">
-                        <div className="flex items-center justify-between text-sm mb-2">
-                          <span className="text-gray-600">Subtotal</span>
-                          <span className="font-semibold text-gray-900">{subtotalFormatted}</span>
-                        </div>
-                        <div className="flex gap-2">
-                          <Link
-                            href="/cart"
-                            onClick={() => setCartOpen(false)}
-                            className="flex-1 text-center px-3 py-2 rounded-lg border text-sm font-semibold hover:bg-gray-50"
-                          >
-                            Ver carrito
-                          </Link>
-                          <Link
-                            href="/checkout"
-                            onClick={() => setCartOpen(false)}
-                            className="flex-1 text-center px-3 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700"
-                          >
-                            Ir a pagar
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Acceso */}
+                {/* SIN carrito para invitados */}
                 <button
                   onClick={() => router.push("/register")}
                   className="bg-blue-600 px-4 py-2 rounded-full text-sm font-semibold text-white hover:bg-blue-700 shadow-md"
@@ -393,37 +307,41 @@ const Navbar = () => {
 
           {/* Mobile: carrito + hamburguesa */}
           <div className="-mr-2 flex md:hidden items-center gap-2">
-            {/* Cart quick access (mobile) — icono */}
-            <button
-              onClick={() => router.push("/cart")}
-              className="relative p-2 rounded-md text-blue-100 hover:text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-white"
-              aria-label="Carrito"
-            >
-              <FaShoppingCart className="h-5 w-5" />
-              {itemCount > 0 && (
-                <span className="absolute -top-1 -right-1 inline-flex items-center justify-center text-[10px] font-bold rounded-full bg-white text-blue-700 px-1.5 py-0.5">
-                  {itemCount}
-                </span>
-              )}
-            </button>
+            {/* Cart quick access (mobile) — PRIVADO */}
+            {user && (
+              <button
+                onClick={() => router.push("/cart")}
+                className="relative p-2 rounded-md text-blue-100 hover:text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-white"
+                aria-label="Carrito"
+              >
+                <FaShoppingCart className="h-5 w-5" />
+                {itemCount > 0 && (
+                  <span className="absolute -top-1 -right-1 inline-flex items-center justify-center text-[10px] font-bold rounded-full bg-white text-blue-700 px-1.5 py-0.5">
+                    {itemCount}
+                  </span>
+                )}
+              </button>
+            )}
 
-            {/* Notificaciones mobile (mismo icono) */}
-            <NotificationBell
-              renderTrigger={({ count, onToggle }) => (
-                <button
-                  onClick={onToggle}
-                  className="relative p-2 rounded-md text-blue-100 hover:text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-white"
-                  aria-label="Notificaciones"
-                >
-                  <IoNotificationsOutline className="h-5 w-5" />
-                  {count > 0 && (
-                    <span className="absolute -top-1 -right-1 inline-flex items-center justify-center text-[10px] font-bold rounded-full bg-red-600 text-white px-1.5 py-0.5">
-                      {count}
-                    </span>
-                  )}
-                </button>
-              )}
-            />
+            {/* Notificaciones mobile */}
+            {user && (
+              <NotificationBell
+                renderTrigger={({ count, onToggle }) => (
+                  <button
+                    onClick={onToggle}
+                    className="relative p-2 rounded-md text-blue-100 hover:text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-white"
+                    aria-label="Notificaciones"
+                  >
+                    <IoNotificationsOutline className="h-5 w-5" />
+                    {count > 0 && (
+                      <span className="absolute -top-1 -right-1 inline-flex items-center justify-center text-[10px] font-bold rounded-full bg-red-600 text-white px-1.5 py-0.5">
+                        {count}
+                      </span>
+                    )}
+                  </button>
+                )}
+              />
+            )}
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -490,7 +408,7 @@ const Navbar = () => {
                 Marketplace
               </Link>
 
-              {/* Carrito (móvil) */}
+              {/* Carrito (móvil) — PRIVADO */}
               <Link
                 href="/cart"
                 className="text-white text-3xl font-bold hover:text-blue-200"
@@ -532,17 +450,9 @@ const Navbar = () => {
                 Comunidad
               </Link>
 
-              {/* Carrito (móvil) para invitado */}
-              <Link
-                href="/cart"
-                className="text-white text-3xl font-bold hover:text-blue-200"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Carrito {itemCount > 0 ? `(${itemCount})` : ""}
-              </Link>
+              {/* SIN carrito para invitados */}
 
               <div className="border-t border-blue-500 w-2/3 my-4" />
-
               <button
                 onClick={() => {
                   router.push("/register");
