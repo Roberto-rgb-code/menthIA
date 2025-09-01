@@ -75,10 +75,14 @@ const Navbar = () => {
          : "text-blue-100 hover:text-white hover:bg-blue-600"
      }`;
 
+  // ✅ Robusto para NextAuth (name/email) y Firebase (displayName) sin error TS
   const getUserDisplayName = () => {
-    if (user?.displayName) return user.displayName.split(" ")[0];
-    if (user?.email) return user.email.split("@")[0];
-    return "Usuario";
+    const u = user as any;
+    const display =
+      (typeof u?.displayName === "string" && u.displayName) ||
+      (typeof u?.name === "string" && u.name) ||
+      (typeof u?.email === "string" && u.email?.split("@")[0]);
+    return display ? String(display).split(" ")[0] : "Usuario";
   };
 
   if (loading) return null;
