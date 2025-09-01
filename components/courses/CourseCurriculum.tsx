@@ -1,6 +1,6 @@
 // components/instructor/create-course/CourseCurriculumStep.tsx
 import React from 'react';
-import { Curso, Seccion } from '../../../types/Curso'; // Asegúrate de que la ruta sea correcta
+import { Curso, Seccion } from '@/types/curso';
 
 interface CourseCurriculumStepProps {
   courseData: Partial<Curso>;
@@ -33,9 +33,9 @@ const CourseCurriculumStep: React.FC<CourseCurriculumStepProps> = ({ courseData,
       const newLesson = {
         id: `lesson-${Date.now()}`,
         titulo: '',
-        tipo: 'video', // Valor por defecto, puede ser 'video', 'articulo', 'quiz', 'descargable'
-        contenidoUrl: '', // URL del video/archivo en S3
-        duracion: 0, // En minutos para videos
+        tipo: 'video',
+        contenidoUrl: '',
+        duracion: 0,
         orden: section.lecciones.length + 1,
       };
       section.lecciones.push(newLesson);
@@ -54,10 +54,9 @@ const CourseCurriculumStep: React.FC<CourseCurriculumStepProps> = ({ courseData,
 
   const removeSection = (index: number) => {
     const updatedSecciones = secciones.filter((_, i) => i !== index);
-    // Reordenar las secciones después de eliminar
     const reorderedSecciones = updatedSecciones.map((sec, i) => ({
-        ...sec,
-        orden: i + 1
+      ...sec,
+      orden: i + 1,
     }));
     handleChange('secciones', reorderedSecciones);
   };
@@ -67,15 +66,13 @@ const CourseCurriculumStep: React.FC<CourseCurriculumStepProps> = ({ courseData,
     const section = updatedSecciones[sectionIndex];
     if (section) {
       section.lecciones = section.lecciones.filter((_, i) => i !== lessonIndex);
-      // Reordenar las lecciones dentro de la sección
       section.lecciones = section.lecciones.map((leccion, i) => ({
-          ...leccion,
-          orden: i + 1
+        ...leccion,
+        orden: i + 1,
       }));
       handleChange('secciones', updatedSecciones);
     }
   };
-
 
   return (
     <div className="bg-white p-8 rounded-lg shadow-md">
@@ -90,7 +87,9 @@ const CourseCurriculumStep: React.FC<CourseCurriculumStepProps> = ({ courseData,
       </button>
 
       {secciones.length === 0 && (
-        <p className="text-gray-500 italic mb-4">Aún no has añadido ninguna sección. Haz clic en el botón de arriba para empezar.</p>
+        <p className="text-gray-500 italic mb-4">
+          Aún no has añadido ninguna sección. Haz clic en el botón de arriba para empezar.
+        </p>
       )}
 
       {secciones.map((section, sectionIndex) => (
@@ -98,10 +97,10 @@ const CourseCurriculumStep: React.FC<CourseCurriculumStepProps> = ({ courseData,
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-xl font-semibold text-gray-800">Sección {section.orden}</h3>
             <button
-                onClick={() => removeSection(sectionIndex)}
-                className="text-red-500 hover:text-red-700 text-sm font-semibold"
+              onClick={() => removeSection(sectionIndex)}
+              className="text-red-500 hover:text-red-700 text-sm font-semibold"
             >
-                Eliminar Sección
+              Eliminar Sección
             </button>
           </div>
           <input
@@ -118,8 +117,13 @@ const CourseCurriculumStep: React.FC<CourseCurriculumStepProps> = ({ courseData,
           )}
           <ul className="space-y-2 ml-4">
             {section.lecciones.map((lesson, lessonIndex) => (
-              <li key={lesson.id} className="flex items-center space-x-2 bg-white p-3 border border-gray-200 rounded-md">
-                <span className="text-gray-600 font-medium mr-2">{sectionIndex + 1}.{lesson.orden}</span>
+              <li
+                key={lesson.id}
+                className="flex items-center space-x-2 bg-white p-3 border border-gray-200 rounded-md"
+              >
+                <span className="text-gray-600 font-medium mr-2">
+                  {sectionIndex + 1}.{lesson.orden}
+                </span>
                 <input
                   type="text"
                   placeholder="Título de la lección"
@@ -127,13 +131,11 @@ const CourseCurriculumStep: React.FC<CourseCurriculumStepProps> = ({ courseData,
                   onChange={(e) => updateLessonTitle(sectionIndex, lessonIndex, e.target.value)}
                   className="flex-grow p-1 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400 text-sm"
                 />
-                {/* Aquí irían los inputs para tipo, contenidoUrl, duración etc. */}
-                {/* Por ahora, solo el título */}
                 <button
-                    onClick={() => removeLesson(sectionIndex, lessonIndex)}
-                    className="text-red-400 hover:text-red-600 text-xs"
+                  onClick={() => removeLesson(sectionIndex, lessonIndex)}
+                  className="text-red-400 hover:text-red-600 text-xs"
                 >
-                    X
+                  X
                 </button>
               </li>
             ))}
