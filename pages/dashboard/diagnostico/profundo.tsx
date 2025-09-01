@@ -729,7 +729,7 @@ const ChatbotDiagnostico: React.FC = () => {
     setLoading(true);
     try {
       const payload = { ...data, userId: data.userId || "", createdAt: new Date().toISOString() };
-      const backend = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+      const backend = process.env.NEXT_PUBLIC_BACKEND_URL || "https://mentorapp-api-llm-1.onrender.com";
       const res = await fetch(`${backend}/api/diagnostico/profundo/analyze`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

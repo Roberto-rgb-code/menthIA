@@ -5,7 +5,7 @@ import { FaRobot, FaUser } from 'react-icons/fa';
 // Por ejemplo: const API_URL = 'http://127.0.0.1:8000/api/chatbot'
 const API_URL = process.env.NEXT_PUBLIC_MENTORAPP_API_URL
   ? `${process.env.NEXT_PUBLIC_MENTORAPP_API_URL}/api/chatbot`
-  : 'http://127.0.0.1:8000/api/chatbot-ayuda';
+  : 'https://mentorapp-api-llm-1.onrender.com/api/chatbot-ayuda';
 
 const ChatbotPanel: React.FC = () => {
   const [chatInput, setChatInput] = useState('');

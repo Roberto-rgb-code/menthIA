@@ -540,7 +540,7 @@ const DiagnosticoEmergencia = () => {
     ]);
 
     try {
-      const response = await fetch('/api/diagnostico/emergencia/analyze', {
+      const response = await fetch('https://mentorapp-api-llm-1.onrender.com/api/diagnostico/emergencia/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(finalDatos),

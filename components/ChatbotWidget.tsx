@@ -4,7 +4,7 @@ import { FaRobot, FaUser, FaTimes, FaCommentDots } from 'react-icons/fa';
 
 interface ChatbotWidgetProps {}
 
-const API_URL = 'http://127.0.0.1:8000/api/chatbot'; // FastAPI endpoint
+const API_URL = 'https://mentorapp-api-llm-1.onrender.com/api/chatbot'; // FastAPI endpoint
 
 const ChatbotWidget: React.FC<ChatbotWidgetProps> = () => {
   const [isOpen, setIsOpen] = useState(false);

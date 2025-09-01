@@ -553,7 +553,7 @@ const DiagnosticoGeneralChatbot = () => {
     setAnalysisResult(null);
 
     try {
-      const response = await fetch('/api/diagnostico/general-analyze', {
+      const response = await fetch('https://mentorapp-api-llm-1.onrender.com/api/diagnostico/general-analyze', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
