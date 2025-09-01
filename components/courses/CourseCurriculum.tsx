@@ -1,6 +1,6 @@
 // components/instructor/create-course/CourseCurriculumStep.tsx
 import React from 'react';
-import { Curso, Seccion } from '@/types/curso';
+import { Curso, Seccion } from '@/types/Curso';
 
 interface CourseCurriculumStepProps {
   courseData: Partial<Curso>;
