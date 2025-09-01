@@ -12,75 +12,83 @@ import {
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../../lib/firebase";
 import { FaGoogle, FaFacebook, FaApple, FaEye, FaEyeSlash } from "react-icons/fa";
-import { toast } from 'react-toastify';
-import * as THREE from 'three';
+import { toast } from "react-toastify";
+import * as THREE from "three";
 
-// Componente de fondo con partículas sutiles
+/** Fondo de partículas (solo cliente) */
 const ParticleBackground = () => {
-  const mountRef = useRef<HTMLDivElement>(null);
-  const sceneRef = useRef<THREE.Scene>();
-  const rendererRef = useRef<THREE.WebGLRenderer>();
-  const animationIdRef = useRef<number>();
+  const mountRef = useRef<HTMLDivElement | null>(null);
+  const sceneRef = useRef<THREE.Scene | null>(null);
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
+  const animationIdRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!mountRef.current) return;
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor(0x000000, 0);
-    mountRef.current.appendChild(renderer.domElement);
+    // Medidas iniciales (a pantalla completa)
+    const width = window.innerWidth;
+    const height = window.innerHeight;
 
+    const scene = new THREE.Scene();
     sceneRef.current = scene;
+
+    const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+    camera.position.z = 5;
+    cameraRef.current = camera;
+
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setSize(width, height);
+    renderer.setClearColor(0x000000, 0);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     rendererRef.current = renderer;
 
+    mountRef.current.appendChild(renderer.domElement);
+
+    // Geometría de partículas
     const particlesGeometry = new THREE.BufferGeometry();
     const particlesCount = 200;
-    const posArray = new Float32Array(particlesCount * 3);
+    const positions = new Float32Array(particlesCount * 3);
     const velocities = new Float32Array(particlesCount * 3);
 
     for (let i = 0; i < particlesCount * 3; i += 3) {
-      posArray[i] = (Math.random() - 0.5) * 20;
-      posArray[i + 1] = (Math.random() - 0.5) * 20;
-      posArray[i + 2] = (Math.random() - 0.5) * 20;
-      
+      positions[i] = (Math.random() - 0.5) * 20;
+      positions[i + 1] = (Math.random() - 0.5) * 20;
+      positions[i + 2] = (Math.random() - 0.5) * 20;
+
       velocities[i] = (Math.random() - 0.5) * 0.002;
       velocities[i + 1] = (Math.random() - 0.5) * 0.002;
       velocities[i + 2] = (Math.random() - 0.5) * 0.002;
     }
 
-    particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-    particlesGeometry.setAttribute('velocity', new THREE.BufferAttribute(velocities, 3));
+    particlesGeometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    particlesGeometry.setAttribute("velocity", new THREE.BufferAttribute(velocities, 3));
 
     const particlesMaterial = new THREE.PointsMaterial({
       size: 0.008,
       color: new THREE.Color().setHSL(0.6, 0.3, 0.9),
       transparent: true,
       opacity: 0.15,
-      blending: THREE.AdditiveBlending
+      blending: THREE.AdditiveBlending,
     });
 
     const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
     scene.add(particlesMesh);
 
-    camera.position.z = 5;
-
     const animate = () => {
       animationIdRef.current = requestAnimationFrame(animate);
 
-      const positions = particlesGeometry.attributes.position.array as Float32Array;
-      const vels = particlesGeometry.attributes.velocity.array as Float32Array;
+      const pos = particlesGeometry.attributes.position.array as Float32Array;
+      const vel = particlesGeometry.attributes.velocity.array as Float32Array;
 
-      for (let i = 0; i < positions.length; i += 3) {
-        positions[i] += vels[i];
-        positions[i + 1] += vels[i + 1];
-        positions[i + 2] += vels[i + 2];
+      for (let i = 0; i < pos.length; i += 3) {
+        pos[i] += vel[i];
+        pos[i + 1] += vel[i + 1];
+        pos[i + 2] += vel[i + 2];
 
-        if (positions[i] > 10 || positions[i] < -10) vels[i] *= -1;
-        if (positions[i + 1] > 10 || positions[i + 1] < -10) vels[i + 1] *= -1;
-        if (positions[i + 2] > 10 || positions[i + 2] < -10) vels[i + 2] *= -1;
+        if (pos[i] > 10 || pos[i] < -10) vel[i] *= -1;
+        if (pos[i + 1] > 10 || pos[i + 1] < -10) vel[i + 1] *= -1;
+        if (pos[i + 2] > 10 || pos[i + 2] < -10) vel[i + 2] *= -1;
       }
 
       particlesGeometry.attributes.position.needsUpdate = true;
@@ -91,139 +99,133 @@ const ParticleBackground = () => {
 
     animate();
 
-    const handleResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+    const onResize = () => {
+      if (!rendererRef.current || !cameraRef.current) return;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      rendererRef.current.setSize(w, h);
+      cameraRef.current.aspect = w / h;
+      cameraRef.current.updateProjectionMatrix();
     };
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", onResize);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
-      if (animationIdRef.current) {
-        cancelAnimationFrame(animationIdRef.current);
+      window.removeEventListener("resize", onResize);
+      if (animationIdRef.current) cancelAnimationFrame(animationIdRef.current);
+      if (rendererRef.current) {
+        if (rendererRef.current.domElement.parentNode) {
+          rendererRef.current.domElement.parentNode.removeChild(rendererRef.current.domElement);
+        }
+        rendererRef.current.dispose();
       }
-      if (mountRef.current && renderer.domElement) {
-        mountRef.current.removeChild(renderer.domElement);
-      }
-      renderer.dispose();
+      particlesGeometry.dispose();
+      particlesMaterial.dispose();
+      scene.clear();
+      sceneRef.current = null;
+      rendererRef.current = null;
+      cameraRef.current = null;
+      animationIdRef.current = null;
     };
   }, []);
 
-  return <div ref={mountRef} className="fixed inset-0 -z-10" />;
+  return <div ref={mountRef} className="fixed inset-0 -z-10" aria-hidden="true" />;
 };
 
+/** Redirección por rol tras login */
 const redirectByRole = async (user: User, router: ReturnType<typeof useRouter>) => {
-  if (!user) {
-    console.log("redirectByRole: No user provided, returning.");
-    return;
-  }
-  console.log("redirectByRole: Attempting to redirect user:", user.uid);
+  if (!user) return;
   try {
     const userDocRef = doc(db, "users", user.uid);
     const userDocSnap = await getDoc(userDocRef);
     if (userDocSnap.exists()) {
-      const userData = userDocSnap.data();
-      const role = userData?.role;
-      console.log("redirectByRole: User role found:", role);
-      
-      if (["emprendedor", "empresa", "universidad", "gobierno"].includes(role)) {
+      const role = userDocSnap.data()?.role as string | undefined;
+      if (["emprendedor", "empresa", "universidad", "gobierno"].includes(role || "")) {
         router.push("/dashboard/inicio");
       } else if (role === "consultor") {
         router.push("/dashboard/consultor");
       } else {
-        console.warn("redirectByRole: Unexpected or missing role, redirecting to default dashboard.");
         router.push("/dashboard/inicio");
       }
     } else {
-      console.warn("redirectByRole: User document not found in Firestore for UID:", user.uid, ". Redirecting to default dashboard.");
       router.push("/dashboard/inicio");
     }
   } catch (e: any) {
-    console.error("redirectByRole: Error redirecting by role:", e);
-    toast.error("Error al redirigir. Por favor, intenta de nuevo.");
+    toast.error("Error al redirigir. Intenta de nuevo.");
     router.push("/dashboard/inicio");
   }
 };
 
 const Login = () => {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
-
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       toast.success("¡Inicio de sesión exitoso!");
       await redirectByRole(userCredential.user, router);
     } catch (err: any) {
-      let userFriendlyMessage = "Error al iniciar sesión. Verifica tus credenciales.";
-      
-      if (err.code === 'auth/invalid-email' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
-        userFriendlyMessage = "Correo electrónico o contraseña incorrectos. Por favor, inténtalo de nuevo.";
-      } else if (err.code === 'auth/network-request-failed') {
-        userFriendlyMessage = "Problema de conexión: Asegúrate de tener una conexión a internet estable.";
-      } else if (err.code === 'auth/too-many-requests') {
-        userFriendlyMessage = "Has realizado demasiados intentos fallidos. Por favor, intenta de nuevo más tarde o utiliza la opción 'Olvidaste tu contraseña'.";
+      let msg = "Error al iniciar sesión. Verifica tus credenciales.";
+      if (["auth/invalid-email", "auth/user-not-found", "auth/wrong-password"].includes(err?.code)) {
+        msg = "Correo o contraseña incorrectos.";
+      } else if (err?.code === "auth/network-request-failed") {
+        msg = "Problema de conexión. Revisa tu internet.";
+      } else if (err?.code === "auth/too-many-requests") {
+        msg = "Demasiados intentos. Prueba más tarde o usa 'Olvidaste tu contraseña'.";
       }
-      
-      setError(userFriendlyMessage);
-      toast.error(userFriendlyMessage);
+      setError(msg);
+      toast.error(msg);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSocialLogin = async (providerName: string) => {
-    let provider;
-    switch (providerName) {
-      case "google":
-        provider = new GoogleAuthProvider();
-        break;
-      case "facebook":
-        provider = new FacebookAuthProvider();
-        break;
-      case "apple":
-        provider = new OAuthProvider("apple.com");
-        provider.addScope("email");
-        provider.addScope("name");
-        break;
-      default:
-        setError("Proveedor de autenticación no reconocido.");
-        toast.error("Proveedor de autenticación no reconocido.");
-        return;
+  const handleSocialLogin = async (providerName: "google" | "facebook" | "apple") => {
+    let provider:
+      | GoogleAuthProvider
+      | FacebookAuthProvider
+      | OAuthProvider
+      | undefined;
+    if (providerName === "google") provider = new GoogleAuthProvider();
+    if (providerName === "facebook") provider = new FacebookAuthProvider();
+    if (providerName === "apple") {
+      provider = new OAuthProvider("apple.com");
+      provider.addScope("email");
+      provider.addScope("name");
     }
-
+    if (!provider) {
+      const msg = "Proveedor de autenticación no reconocido.";
+      setError(msg);
+      toast.error(msg);
+      return;
+    }
     setError("");
     setIsLoading(true);
-
     try {
       const userCredential = await signInWithPopup(auth, provider);
       toast.success(`¡Inicio de sesión exitoso con ${providerName}!`);
       await redirectByRole(userCredential.user, router);
     } catch (err: any) {
-      let userFriendlyMessage = `Error al iniciar sesión con ${providerName}.`;
-      
-      if (err.code === 'auth/network-request-failed') {
-        userFriendlyMessage = "Problema de conexión: Asegúrate de tener una conexión a internet estable.";
-      } else if (err.code === 'auth/popup-closed-by-user') {
-        userFriendlyMessage = "La ventana de inicio de sesión fue cerrada por el usuario.";
-      } else if (err.code === 'auth/cancelled-popup-request') {
-        userFriendlyMessage = "La solicitud de ventana emergente fue cancelada. Por favor, intenta de nuevo.";
-      } else if (err.code === 'auth/account-exists-with-different-credential') {
-        userFriendlyMessage = "Ya existe una cuenta con el mismo correo electrónico pero con un proveedor diferente. Intenta iniciar sesión con tu método original.";
+      let msg = `Error al iniciar sesión con ${providerName}.`;
+      if (err?.code === "auth/network-request-failed") {
+        msg = "Problema de conexión. Revisa tu internet.";
+      } else if (err?.code === "auth/popup-closed-by-user") {
+        msg = "La ventana de inicio de sesión fue cerrada.";
+      } else if (err?.code === "auth/cancelled-popup-request") {
+        msg = "Solicitud cancelada. Intenta de nuevo.";
+      } else if (err?.code === "auth/account-exists-with-different-credential") {
+        msg = "Ya existe una cuenta con ese correo pero otro proveedor.";
       }
-      
-      setError(userFriendlyMessage);
-      toast.error(userFriendlyMessage);
+      setError(msg);
+      toast.error(msg);
     } finally {
       setIsLoading(false);
     }
@@ -234,21 +236,21 @@ const Login = () => {
       <ParticleBackground />
       <div className="absolute inset-0 bg-gradient-to-br from-blue-400 via-cyan-400 via-sky-300 to-indigo-400" />
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-sky-500/20 to-indigo-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-gradient-to-r from-cyan-500/20 to-blue-600/20 rounded-full blur-2xl animate-pulse delay-500"></div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-sky-500/20 to-indigo-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
+        <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-gradient-to-r from-cyan-500/20 to-blue-600/20 rounded-full blur-2xl animate-pulse delay-500" />
       </div>
-      
+
       {/* Header con enlace a "/" */}
       <div className="relative z-10 pt-6 pl-8">
-        <h1 
+        <h1
           className="text-white text-2xl font-semibold cursor-pointer hover:underline"
           onClick={() => router.push("/")}
         >
           MenthIA
         </h1>
       </div>
-      
+
       {/* Contenido principal */}
       <div className="relative z-10 flex-1 flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-md">
@@ -265,7 +267,8 @@ const Login = () => {
               </div>
             )}
 
-            <div onSubmit={handleLogin} className="space-y-6">
+            {/* ✅ onSubmit en <form> */}
+            <form onSubmit={handleLogin} className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="email">
                   Correo electrónico
@@ -308,6 +311,7 @@ const Login = () => {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                   >
                     {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
                   </button>
@@ -315,26 +319,25 @@ const Login = () => {
               </div>
 
               <button
-                type="button"
-                onClick={handleLogin}
+                type="submit"
                 disabled={isLoading}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-semibold shadow-lg hover:shadow-xl transform transition-all duration-300 hover:scale-[1.02] disabled:opacity-50"
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center">
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
                     Iniciando sesión...
                   </div>
                 ) : (
                   "Iniciar Sesión"
                 )}
               </button>
-            </div>
+            </form>
 
             <div className="flex items-center my-8">
-              <div className="flex-1 h-px bg-gray-300"></div>
+              <div className="flex-1 h-px bg-gray-300" />
               <span className="px-4 text-gray-500 text-sm font-medium">o</span>
-              <div className="flex-1 h-px bg-gray-300"></div>
+              <div className="flex-1 h-px bg-gray-300" />
             </div>
 
             <div className="space-y-3">
@@ -346,7 +349,7 @@ const Login = () => {
                 <FaGoogle className="text-red-500 mr-3 text-lg" />
                 Inicia sesión con Google
               </button>
-              
+
               <button
                 onClick={() => handleSocialLogin("facebook")}
                 disabled={isLoading}
@@ -381,12 +384,11 @@ const Login = () => {
         </div>
       </div>
 
+      {/* Footer */}
       <div className="relative z-10 pb-6 px-8">
         <div className="flex flex-col sm:flex-row items-center justify-center text-white/80 text-sm space-y-2 sm:space-y-0 sm:space-x-6">
           <span>© MenthIA</span>
-          <button className="hover:text-white transition-colors">
-            Privacidad y condiciones
-          </button>
+          <button className="hover:text-white transition-colors">Privacidad y condiciones</button>
         </div>
       </div>
     </div>
