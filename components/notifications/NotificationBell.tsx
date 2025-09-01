@@ -14,7 +14,11 @@ type Notif = {
   meta?: any;
 };
 
-export default function NotificationBell() {
+type NotificationBellProps = {
+  renderTrigger?: (args: { count: number; onToggle: () => void }) => React.ReactNode;
+};
+
+export default function NotificationBell({ renderTrigger }: NotificationBellProps) {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -25,18 +29,19 @@ export default function NotificationBell() {
   const unread = items.filter((n) => !n.read).length;
 
   async function load() {
-    if (!user?.uid) return;
+    const uid = (user as any)?.uid || (user as any)?.id; // soporta distintos providers
+    if (!uid) return;
     setLoading(true);
     setError(null);
     try {
       const r = await fetch(`/api/notifications/list?limit=30`, {
-        headers: { "x-user-id": user.uid },
+        headers: { "x-user-id": String(uid) },
       });
       const j = await r.json();
       if (!r.ok) throw new Error(j?.error || "No se pudo cargar");
-      setItems(j.items || []);
+      setItems(Array.isArray(j.items) ? j.items : []);
     } catch (e: any) {
-      setError(e.message);
+      setError(e.message || "Error inesperado");
     } finally {
       setLoading(false);
     }
@@ -58,20 +63,26 @@ export default function NotificationBell() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
 
+  const onToggle = () => setOpen((s) => !s);
+
   return (
     <div className="relative" ref={panelRef}>
-      <button
-        onClick={() => setOpen((s) => !s)}
-        className="relative text-white hover:text-yellow-300 p-2 rounded-lg"
-        aria-label="Notificaciones"
-      >
-        <IoNotificationsOutline className="h-6 w-6" />
-        {unread > 0 && (
-          <span className="absolute -top-1 -right-1 inline-flex items-center justify-center text-[10px] font-bold rounded-full bg-red-600 text-white px-1.5 py-0.5">
-            {unread}
-          </span>
-        )}
-      </button>
+      {renderTrigger ? (
+        <>{renderTrigger({ count: unread, onToggle })}</>
+      ) : (
+        <button
+          onClick={onToggle}
+          className="relative text-white hover:text-yellow-300 p-2 rounded-lg"
+          aria-label="Notificaciones"
+        >
+          <IoNotificationsOutline className="h-6 w-6" />
+          {unread > 0 && (
+            <span className="absolute -top-1 -right-1 inline-flex items-center justify-center text-[10px] font-bold rounded-full bg-red-600 text-white px-1.5 py-0.5">
+              {unread}
+            </span>
+          )}
+        </button>
+      )}
 
       {open && (
         <div className="absolute right-0 mt-2 w-[22rem] bg-white rounded-lg shadow-xl ring-1 ring-black ring-opacity-5 z-50">
@@ -92,13 +103,14 @@ export default function NotificationBell() {
                 <div key={n.id} className="p-3 hover:bg-gray-50">
                   <div className="flex items-center justify-between gap-2">
                     <div className="text-sm font-semibold text-gray-800">{n.title || "Notificación"}</div>
-                    {!n.read && <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700">nuevo</span>}
+                    {!n.read && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700">nuevo</span>
+                    )}
                   </div>
                   <div className="text-sm text-gray-700 mt-0.5">{n.body}</div>
                   <div className="text-[11px] text-gray-400 mt-1">
                     {new Date(n.createdAt).toLocaleString()}
                   </div>
-                  {/* Links rápidos si vienen en meta */}
                   {n.meta?.meetLink || n.meta?.calendarHtmlLink ? (
                     <div className="mt-2 flex gap-2">
                       {n.meta?.meetLink && (
@@ -129,17 +141,10 @@ export default function NotificationBell() {
           )}
 
           <div className="px-3 py-2 border-t bg-gray-50 rounded-b-lg flex items-center justify-between">
-            <button
-              className="text-xs text-gray-600 hover:text-gray-800"
-              onClick={load}
-              disabled={loading}
-            >
+            <button className="text-xs text-gray-600 hover:text-gray-800" onClick={load} disabled={loading}>
               {loading ? "Actualizando…" : "Actualizar"}
             </button>
-            <a
-              href="/dashboard/notificaciones"
-              className="text-xs text-blue-700 hover:underline"
-            >
+            <a href="/dashboard/notificaciones" className="text-xs text-blue-700 hover:underline">
               Ver todas →
             </a>
           </div>
