@@ -1,4 +1,4 @@
-// types/curso.ts
+// types/Curso.ts
 
 export type TipoLeccion = 'video' | 'articulo' | 'quiz' | 'descargable';
 
@@ -19,6 +19,7 @@ export interface Leccion {
   descripcion?: string;
   esVistaPrevia?: boolean;
   recursosDescargables?: RecursoDescargable[];
+  imagenUrl?: string;            // Agregado: Propiedad para el póster del video
 }
 
 // --- 2. Secciones del Curso ---
