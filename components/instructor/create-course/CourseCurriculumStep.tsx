@@ -1,6 +1,6 @@
 // components/instructor/create-course/CourseCurriculumStep.tsx
 import React, { useState, useRef, useEffect } from 'react';
-import { Curso, Seccion, Leccion, RecursoDescargable } from '@/types/curso';
+import { Curso, Seccion, Leccion, RecursoDescargable } from '@/types/Curso'; // Updated to capital 'C'
 import { FaPlus, FaTrash, FaChevronDown, FaChevronUp, FaVideo, FaFileAlt, FaUpload, FaSpinner } from 'react-icons/fa';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'react-toastify';
