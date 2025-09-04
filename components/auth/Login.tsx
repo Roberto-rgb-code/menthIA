@@ -18,9 +18,9 @@ import * as THREE from 'three';
 // Componente de fondo con partículas sutiles
 const ParticleBackground = () => {
   const mountRef = useRef<HTMLDivElement>(null);
-  const sceneRef = useRef<THREE.Scene>();
-  const rendererRef = useRef<THREE.WebGLRenderer>();
-  const animationIdRef = useRef<number>();
+  const sceneRef = useRef<THREE.Scene | null>(null); // Allow null
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null); // Allow null
+  const animationIdRef = useRef<number | null>(null); // Allow null
 
   useEffect(() => {
     if (!mountRef.current) return;
