@@ -1,6 +1,6 @@
 // components/instructor/create-course/CourseObjectivesStep.tsx
 import React from 'react';
-import { Curso } from '../../../../types/Curso'; // Asegúrate de la ruta correcta
+import { Curso } from '@/types/Curso'; // Use @ alias for consistent import
 import { FaPlus, FaTrash } from 'react-icons/fa';
 
 interface CourseObjectivesStepProps {
@@ -80,7 +80,7 @@ const CourseObjectivesStep: React.FC<CourseObjectivesStepProps> = ({
           <FaPlus className="mr-2" /> Añadir otro objetivo
         </button>
         {courseData.loQueAprenderas && courseData.loQueAprenderas.filter(Boolean).length < 4 && (
-            <p className="mt-2 text-sm text-red-600">Necesitas al menos 4 objetivos.</p>
+          <p className="mt-2 text-sm text-red-600">Necesitas al menos 4 objetivos.</p>
         )}
       </div>
 
@@ -138,7 +138,6 @@ const CourseObjectivesStep: React.FC<CourseObjectivesStepProps> = ({
           onChange={(e) => handleChange('publicoObjetivo', e.target.value)}
         ></textarea>
       </div>
-
     </div>
   );
 };
