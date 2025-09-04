@@ -142,7 +142,7 @@ const CourseDetailPage: React.FC = () => {
   const totalDurationMinutes = useMemo(() => {
     if (!course?.secciones) return 0;
     return course.secciones.reduce((acc, s) => {
-      const mins = (s.lecciones || []).reduce((a, l) => a + (l.duracionMinutos || 0), 0);
+      const mins = (s.lecciones || []).reduce((a, l) => a + (l.duracion || 0), 0); // Changed to duracion
       return acc + mins;
     }, 0);
   }, [course?.secciones]);
@@ -453,7 +453,7 @@ const CourseDetailPage: React.FC = () => {
             </div>
 
             {(course.secciones || []).map((section: Seccion) => {
-              const secMinutes = (section.lecciones || []).reduce((a, l) => a + (l.duracionMinutos || 0), 0);
+              const secMinutes = (section.lecciones || []).reduce((a, l) => a + (l.duracion || 0), 0); // Changed to duracion
               const opened = openSections.has(section.id);
               return (
                 <div key={section.id} className="border border-gray-200 rounded-lg overflow-hidden">
@@ -482,7 +482,7 @@ const CourseDetailPage: React.FC = () => {
                             <FaPlayCircle className="mr-3 text-blue-500" />
                             <span className="font-medium">{lesson.titulo || 'Lección'}</span>
                           </div>
-                          <span className="text-sm text-gray-500">{formatDuration(lesson.duracionMinutos || 0)}</span>
+                          <span className="text-sm text-gray-500">{formatDuration(lesson.duracion || 0)}</span> {/* Changed to duracion */}
                         </div>
                       ))}
                     </div>
