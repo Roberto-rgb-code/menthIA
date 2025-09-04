@@ -19,7 +19,8 @@ export interface Leccion {
   descripcion?: string;
   esVistaPrevia?: boolean;
   recursosDescargables?: RecursoDescargable[];
-  imagenUrl?: string;            // Agregado: Propiedad para el póster del video
+  imagenUrl?: string;            // Added previously
+  contenidoTexto?: string;       // Added to fix the error
 }
 
 // --- 2. Secciones del Curso ---
