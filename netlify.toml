@@ -1,12 +1,11 @@
 [build]
-  command = "npm install && npm run build"
+  command = "npm ci --include=dev && npm run build"
   publish = ".next"
 
 [build.environment]
   NODE_ENV = "production"
   NODE_OPTIONS = "--max-old-space-size=4096"
   NEXT_PRIVATE_STANDALONE = "true"
-  NPM_FLAGS = "--include=dev"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
