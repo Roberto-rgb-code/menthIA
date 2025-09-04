@@ -1,6 +1,6 @@
 // components/instructor/create-course/CoursePlanningStep.tsx
 import React from 'react';
-import { Curso } from '../../../../types/Curso'; // Asegúrate de la ruta correcta
+import { Curso } from '@/types/Curso'; // Updated to use @ alias
 
 interface CoursePlanningStepProps {
   courseData: Partial<Curso>;
@@ -39,11 +39,11 @@ const CoursePlanningStep: React.FC<CoursePlanningStepProps> = ({
           ))}
         </select>
         {!courseData.categoria && (
-            <p className="mt-2 text-sm text-red-600">Por favor, selecciona una categoría.</p>
+          <p className="mt-2 text-sm text-red-600">Por favor, selecciona una categoría.</p>
         )}
       </div>
 
-      {/* Campo de Nivel (ejemplo, puedes añadir más opciones) */}
+      {/* Campo de Nivel */}
       <div className="mb-8">
         <label htmlFor="nivel" className="block text-xl font-semibold text-gray-800 mb-3">
           ¿Cuál es el nivel de tu curso?
@@ -93,7 +93,7 @@ const CoursePlanningStep: React.FC<CoursePlanningStepProps> = ({
               type="radio"
               name="dedicacionTiempo"
               value="0-2 horas"
-              checked={courseData.dedicacionTiempo === '0-2 horas'} // Asumiendo que añades dedicacionTiempo a tu interfaz Curso
+              checked={courseData.dedicacionTiempo === '0-2 horas'}
               onChange={() => handleChange('dedicacionTiempo', '0-2 horas')}
               className="form-radio h-5 w-5 text-blue-600"
             />
@@ -134,7 +134,6 @@ const CoursePlanningStep: React.FC<CoursePlanningStepProps> = ({
           </label>
         </div>
       </div>
-
     </div>
   );
 };
