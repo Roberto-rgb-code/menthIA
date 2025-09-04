@@ -61,6 +61,6 @@
     "@types/react-slick": "^0.23.13",
     "@types/react-toastify": "^4.0.2",
     "tailwindcss": "^4.0.17",
-    "typescript": "^5"
+    "typescript": "^5.9.2"
   }
 }
