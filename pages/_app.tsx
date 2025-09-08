@@ -10,6 +10,7 @@ import { CartProvider } from '../contexts/CartContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+
 import ChatbotWidget from '@/components/ChatbotWidget';
 
 function MyApp({ Component, pageProps }: AppProps) {
